@@ -1,0 +1,39 @@
+(1) Rodar o servidor do front na porta 8080 para não conflitar com a 80 do docker
+
+(2) Configurar docker no debian
+	DEBIAN
+		* https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-debian-10
+			sudo apt update
+			sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+			curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+			sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+			sudo apt update
+			apt-cache policy docker-ce
+			sudo apt install docker-ce
+			sudo systemctl status docker
+			sudo curl -L https://github.com/docker/compose/releases/download/1.25.3/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+			sudo chmod +x /usr/local/bin/docker-compose
+			sudo chown $USER /var/run/docker.sock
+
+	UBUNTU
+		* https://docs.docker.com/engine/install/ubuntu/
+		* https://unix.stackexchange.com/questions/363048/unable-to-locate-package-docker-ce-on-a-64bit-ubuntu
+	- Siga os passos do Step 1
+	- Depois: 
+		> sudo usermod -aG docker ${USER}
+	- Depois, execute isso
+		> sudo apt-get install docker-compose
+
+(3) Configurar Nginx
+	* https://pentacent.medium.com/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71
+	- data/nginx/app.config: 
+		- trocar todos os domains.org pelo seu domínio (4 no total)
+		- na variável "proxy_pass" setar http://${ip_interno da intranet}:8080
+			* Esse IP interno é descoberto com o seguinte comando:
+			> hostname -I | awk '{print $1}'
+		- caso queira redirecionar o back pro ssl, use uma location nova
+	- letsencrypt.sh: 
+		- trocar todos os domains.org pelo seu domínio (2 no total)
+		- por seu email na string indicada
+	> ./init-letsencrypt.sh
+	> docker-compose up -d
